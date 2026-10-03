@@ -101,7 +101,10 @@ Approved:
 
 ## Video render
 
-1. Write a storyboard of beats. Each beat is one visual change plus the sentence spoken during that change.
-2. Render with Manim (`manim`) on the local machine. Background dark, one object transforming into the next idea, no title-card slideshow.
-3. Speech: if `ELEVENLABS_API_KEY` is set, use ElevenLabs. If it is not set, use local speech and keep going.
-4. Deliver the video file. The lede is one STE sentence and the path.
+Make the video on [ngram](https://www.ngram.com/). Docs: [MCP](https://www.ngram.com/docs/mcp), [API](https://www.ngram.com/docs/getting-started).
+
+1. Write the brief: audience, length, tone, and the prompt. Show it. Stop.
+2. Wait for a yes that names this brief. Do not start a render, and do not spend credits, before that yes.
+3. If ngram MCP is connected, read the tool schema. Use `prepare_video`, then `create_video` after the yes. If those tools are absent, use `create_video_from_text` after the yes.
+4. Do not ask for an API key in chat. If ngram is not connected, say so in one sentence. Give the storyboard as a web page.
+5. Use Manim on the local machine only when the user asks for a local file. One idea transforms into the next. Speech uses ElevenLabs only when `ELEVENLABS_API_KEY` is already set. Otherwise use local speech.

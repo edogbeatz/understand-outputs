@@ -3,7 +3,8 @@ name: understand-outputs
 description: >-
   Climbs an output ladder so results are easier to oversee: ASD-STE100 writing
   (or 80% of the way to it), then a diagram, then an interactive HTML page,
-  then a bespoke 3Blue1Brown-style explainer video. Use when the user asks to
+  then a bespoke explainer video on ngram.com after the user approves that
+  video's brief. Use when the user asks to
   understand, explain, summarize, compare, or review model output, a system, a
   decision, or a topic — and by default on explanatory replies. Implementation
   work still ships the code the user asked for.
@@ -32,7 +33,12 @@ When two rungs can carry the idea, pick the higher one.
 1. **Writing** — The answer is a few facts. Write the whole answer at 80% of the way to ASD-STE100. Use full ASD-STE100 when the user asks for the spec, or for a procedure in that language.
 2. **Diagram** — The idea is a structure, a flow, a comparison, or an anatomy. Make a figure (SVG or a generated image). Use Mermaid only when a figure file is not worth opening.
 3. **Web page** — The idea has parts the user will explore, compare, filter, or operate. Write one self-contained HTML file. Open it. Design it for the subject. Motion only where motion teaches the idea.
-4. **Explainer video** — The idea becomes clear only as it changes through time. Make a 3Blue1Brown-style video: one idea on screen, a continuous transformation, narration locked to the change. Render with Manim on the local machine. Narration uses ElevenLabs when `ELEVENLABS_API_KEY` is already in the environment. Otherwise use local speech (`say` on macOS, or another TTS already installed). Do not ask the user to paste an API key. If the render cannot finish, deliver the web page as the storyboard and say, in one sentence, that the video file is not ready.
+4. **Explainer video** — The idea becomes clear only as it changes through time. Make it on [ngram](https://www.ngram.com/). Approval comes first.
+   - Write the brief in the chat: audience, length, tone, and the prompt you will send. Then stop.
+   - Create the video only after the user says yes to that brief. A yes on an earlier video does not cover this one.
+   - When ngram MCP is connected at `https://mcp.ngram.com`, read the tool schema first. Call `prepare_video` to show the plan. Call `create_video` only after the yes. If those tools are absent, use `create_video_from_text` after the yes.
+   - Do not ask the user to paste an API key. If ngram is not connected, say so in one sentence and point to [the MCP docs](https://www.ngram.com/docs/mcp). Deliver the web page as the storyboard.
+   - Render locally with Manim only when the user asks for a local file. Narration then uses ElevenLabs when `ELEVENLABS_API_KEY` is already set. Otherwise use local speech.
 
 ### Lede
 

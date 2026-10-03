@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Output ladder — ASD-STE100</title>
+<style>
+  :root {
+    --bench: #d5dbe3;
+    --sheet: #f4f6f8;
+    --ink: #161a20;
+    --muted: #5c6570;
+    --blue: #1b3a4b;
+    --blue-ink: #f3f7f8;
+    --green: #1c6b45;
+    --green-wash: #e5f3eb;
+    --red: #9e2b25;
+    --red-wash: #f8e8e6;
+    --amber: #8a5a12;
+    --amber-wash: #f8f0dc;
+    --line: #c5ccd4;
+    --focus: #1b3a4b;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(22, 26, 32, 0.06) 1px, transparent 0) 0 0 / 18px 18px,
+      var(--bench);
+    color: var(--ink);
+    font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .sheet {
+    max-width: 1080px;
+    margin: 28px auto;
+    background: var(--sheet);
+    border: 1px solid #aeb6c0;
+    position: relative;
+  }
+
+  .sheet::before,
+  .sheet::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--blue);
+    border-style: solid;
+    pointer-events: none;
+  }
+  .sheet::before { top: 8px; left: 8px; border-width: 1.5px 0 0 1.5px; }
+  .sheet::after { bottom: 8px; right: 8px; border-width: 0 1.5px 1.5px 0; }
+
+  header.bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-end;
+    background: var(--blue);
+    color: var(--blue-ink);
+    padding: 18px 28px 16px;
+  }
+  .spec {
+    font-family: "Avenir Next Condensed", "Avenir Next", "Helvetica Neue", sans-serif;
+    font-stretch: condensed;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  h1 {
+    margin: 2px 0 0;
+    font-family: "Avenir Next Condensed", "Avenir Next", "Helvetica Neue", sans-serif;
+    font-stretch: condensed;
+    font-weight: 600;
+    font-size: 34px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 0.95;
+  }
+  .bar-side { text-align: right; }
+  .mode {
+    display: inline-flex;
+    border: 1px solid rgba(243, 247, 248, 0.45);
+    margin-top: 8px;
+  }
+  .mode button {
+    appearance: none;
+    background: transparent;
+    color: var(--blue-ink);
+    border: 0;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .mode button[aria-pressed="true"] {
+    background: var(--blue-ink);
+    color: var(--blue);
+  }
+  .mode button:focus-visible,
+  .rail button:focus-visible,
+  .presets button:focus-visible,
+  .kind button:focus-visible,
+  .study-controls button:focus-visible,
+  .spans button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .lede {
+    margin: 0;
+    padding: 18px 28px 0;
+    max-width: 62ch;
+    font-size: 18px;
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    padding: 18px 20px 24px;
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--line);
+    padding-right: 12px;
+    margin-right: 18px;
+  }
+  .rail button {
+    appearance: none;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    color: var(--ink);
+    font: inherit;
+    padding: 12px 10px;
+    cursor: pointer;
+  }
+  .rail button[aria-pressed="true"] {
+    border-left-color: var(--green);
+    background: var(--green-wash);
+  }
+  .rail .idx {
+    display: block;
+    font-family: "Avenir Next Condensed", "Avenir Next", sans-serif;
+    font-stretch: condensed;
+    letter-spacing: 0.16em;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .rail .name {
+    display: block;
+    font-size: 18px;
+    margin-top: 2px;
+  }
+  .rail .hint {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .stage { min-width: 0; }
+  .stage h2 {
+    margin: 0 0 6px;
+    font-family: "Avenir Next Condensed", "Avenir Next", sans-serif;
+    font-stretch: condensed;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 22px;
+  }
+  .stage > p { margin: 0 0 14px; max-width: 68ch; }
+
+  .panel { display: none; }
+  .panel.is-on { display: block; }
+
+  .work {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  label.field {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    resize: vertical;
+    border: 1px solid var(--line);
+    background: white;
+    color: var(--ink);
+    font: 16px/1.45 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    padding: 12px;
+  }
+  textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .out {
+    min-height: 140px;
+    border: 1px solid var(--line);
+    background: var(--green-wash);
+    padding: 12px;
+    font: 16px/1.45 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  .out.is-marks,
+  .out.is-empty { background: white; }
+  .out.is-empty { color: var(--muted); }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 12px 0;
+  }
+  .presets, .kind { display: flex; flex-wrap: wrap; gap: 6px; }
+  .presets button, .kind button, .study-controls button {
+    appearance: none;
+    background: white;
+    border: 1px solid var(--line);
+    font: inherit;
+    font-size: 14px;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .presets button[aria-pressed="true"],
+  .kind button[aria-pressed="true"] {
+    background: var(--blue);
+    color: var(--blue-ink);
+    border-color: var(--blue);
+  }
+
+  .meter {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+  }
+  .meter strong { font-weight: 600; }
+  .meter.warn { color: var(--amber); }
+  .meter.bad { color: var(--red); }
+  .meter.ok { color: var(--green); }
+
+  .marks { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; }
+  .stamp {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid var(--line);
+    background: white;
+  }
+  .stamp.reject { color: var(--red); background: var(--red-wash); border-color: #e3b7b3; }
+  .stamp.caution { color: var(--amber); background: var(--amber-wash); border-color: #e4d3a4; }
+  .stamp.ok { color: var(--green); background: var(--green-wash); border-color: #b7d8c4; }
+  mark.hit {
+    background: #f3c7c3;
+    color: inherit;
+    padding: 0 2px;
+  }
+
+  .anatomy {
+    border: 1px solid var(--line);
+    background: white;
+    padding: 18px;
+  }
+  .sentence {
+    font: 18px/1.55 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    margin: 12px 0 14px;
+  }
+  .sentence button {
+    appearance: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: var(--green-wash);
+    font: inherit;
+    padding: 0 3px 1px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .sentence button[aria-pressed="true"] {
+    border-bottom-color: var(--green);
+  }
+  .note {
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    min-height: 72px;
+  }
+  .note .kw {
+    font-family: "Avenir Next Condensed", "Avenir Next", sans-serif;
+    font-stretch: condensed;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: var(--green);
+  }
+  .rejected {
+    margin-top: 14px;
+    color: var(--red);
+    font: 15px/1.4 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  .page-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .card {
+    border: 1px solid var(--line);
+    background: white;
+    padding: 14px 14px 16px;
+  }
+  .card .k {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card p { margin: 6px 0 0; }
+
+  .study {
+    border: 1px solid var(--line);
+    background: #12171c;
+    color: #f4f6f8;
+    min-height: 280px;
+    padding: 22px 22px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .study .frame {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding-bottom: 36px;
+  }
+  .study .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8fa3b0;
+  }
+  .study .line {
+    font: 22px/1.4 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    max-width: 36ch;
+  }
+  .study .bad { color: #f0c4c0; }
+  .study .good { color: #c6ead4; }
+  .study-controls {
+    position: absolute;
+    left: 22px;
+    bottom: 14px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .study-controls button {
+    background: transparent;
+    color: #f4f6f8;
+    border-color: #3c4a55;
+  }
+  .caption {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  footer.foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 1px solid var(--line);
+    padding: 12px 28px 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .study .frame { animation: none; }
+  }
+  @media (max-width: 800px) {
+    .sheet { margin: 0; border-left: 0; border-right: 0; }
+    header.bar, .lede, footer.foot { padding-left: 16px; padding-right: 16px; }
+    .body { grid-template-columns: 1fr; padding: 12px; }
+    .rail {
+      flex-direction: row;
+      overflow-x: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+      margin: 0 0 14px;
+      padding: 0 0 8px;
+    }
+    .rail button { min-width: 140px; }
+    .work, .page-grid { grid-template-columns: 1fr; }
+    .meter { margin-left: 0; }
+    h1 { font-size: 28px; }
+    footer.foot { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+  <article class="sheet">
+    <header class="bar">
+      <div>
+        <div class="spec">ASD-STE100 · Simplified Technical English</div>
+        <h1>Output ladder</h1>
+      </div>
+      <div class="bar-side">
+        <div class="spec">Section 3 · Writing register</div>
+        <div class="mode" role="group" aria-label="Writing register">
+          <button type="button" id="mode-80" aria-pressed="true">80%</button>
+          <button type="button" id="mode-full" aria-pressed="false">Full spec</button>
+        </div>
+      </div>
+    </header>
+
+    <p class="lede">Use the highest format that makes the idea clear. This page is that format for the ladder itself.</p>
+
+    <div class="body">
+      <nav class="rail" aria-label="Rungs">
+        <button type="button" data-rung="write" aria-pressed="true">
+          <span class="idx">01</span>
+          <span class="name">Writing</span>
+          <span class="hint">ASD-STE100</span>
+        </button>
+        <button type="button" data-rung="diagram" aria-pressed="false">
+          <span class="idx">02</span>
+          <span class="name">Diagram</span>
+          <span class="hint">Sentence anatomy</span>
+        </button>
+        <button type="button" data-rung="page" aria-pressed="false">
+          <span class="idx">03</span>
+          <span class="name">Web page</span>
+          <span class="hint">You are here</span>
+        </button>
+        <button type="button" data-rung="video" aria-pressed="false">
+          <span class="idx">04</span>
+          <span class="name">Video</span>
+          <span class="hint">Motion study</span>
+        </button>
+      </nav>
+
+      <div class="stage">
+        <section class="panel is-on" id="panel-write" aria-labelledby="h-write">
+          <h2 id="h-write">Writing</h2>
+          <p>Put a sentence in the box. The page marks words from the sample dictionary, and it checks the verb form and the word cap. The sample is not the full list of about 1100 approved words.</p>
+          <div class="toolbar">
+            <div class="presets" role="group" aria-label="Presets">
+              <button type="button" data-preset="reservoir" aria-pressed="true">Reservoir</button>
+              <button type="button" data-preset="valve" aria-pressed="false">Valve</button>
+              <button type="button" data-preset="brake" aria-pressed="false">Brake</button>
+            </div>
+            <div class="kind" role="group" aria-label="Sentence kind">
+              <button type="button" data-kind="procedural" aria-pressed="true">Procedural · 20</button>
+              <button type="button" data-kind="descriptive" aria-pressed="false">Descriptive · 25</button>
+            </div>
+            <div class="meter ok" id="meter" aria-live="polite">0 words</div>
+          </div>
+          <div class="work">
+            <div>
+              <label class="field" for="source">Source</label>
+              <textarea id="source" spellcheck="true"></textarea>
+            </div>
+            <div>
+              <div class="field" id="approved-label">Approved rewrite</div>
+              <div class="out" id="approved" aria-labelledby="approved-label"></div>
+            </div>
+          </div>
+          <div class="toolbar">
+            <div class="marks" id="marks" aria-live="polite"></div>
+          </div>
+          <p id="marked-source" hidden></p>
+        </section>
+
+        <section class="panel" id="panel-diagram" aria-labelledby="h-diagram">
+          <h2 id="h-diagram">Diagram</h2>
+          <p>Read the approved sentence. Select a part. The mark tells you which rule holds that part.</p>
+          <div class="anatomy">
+            <div class="spec">Procedural sentence · 13 words · limit 20</div>
+            <p class="sentence">
+              <button type="button" data-part="verb" aria-pressed="true">Make sure</button>
+              that the
+              <button type="button" data-part="name" aria-pressed="false">hydraulic reservoir</button>
+              <button type="button" data-part="full" aria-pressed="false">is full</button>
+              <button type="button" data-part="before" aria-pressed="false">before</button>
+              <button type="button" data-part="start" aria-pressed="false">you start</button>
+              the operation.
+            </p>
+            <div class="note" id="part-note" aria-live="polite"></div>
+            <div class="rejected">Not approved: “It is imperative that the operator ensures the hydraulic reservoir is replenished prior to commencing operation.”</div>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-page" aria-labelledby="h-page">
+          <h2 id="h-page">Web page</h2>
+          <p>A page lets you operate the idea. This file is that page. Throw it away when you are done with it.</p>
+          <div class="page-grid">
+            <div class="card">
+              <div class="k">Oversight</div>
+              <p>The model does the legwork. You check the result. Your work moves up, into understanding.</p>
+            </div>
+            <div class="card">
+              <div class="k">Artifacts</div>
+              <p>Ask for a large custom artifact that you can discard. A page. A video. A tool that exists for one question.</p>
+            </div>
+            <div class="card">
+              <div class="k">This file</div>
+              <p>One HTML file. No network. The writing rung runs on this machine, in the browser.</p>
+            </div>
+            <div class="card">
+              <div class="k">Next rung</div>
+              <p>Use a video when the idea becomes clear only as it changes. Open the motion study on rung 04.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-video" aria-labelledby="h-video">
+          <h2 id="h-video">Video</h2>
+          <p>A 3Blue1Brown-style video is a change you can watch. This study is the same change, on the page. A full video is a rendered file with speech.</p>
+          <div class="study" id="study">
+            <div class="frame">
+              <div class="eyebrow" id="beat-kicker">Beat 1 · Source</div>
+              <div class="line bad" id="beat-line">It is imperative that the operator ensures the reservoir is replenished prior to commencing operation.</div>
+            </div>
+            <div class="study-controls">
+              <button type="button" id="play" aria-pressed="true">Pause</button>
+            </div>
+          </div>
+          <p class="caption">Speech: ElevenLabs when a key is already on the machine. Otherwise the local voice. Do not paste a key into the chat.</p>
+        </section>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <div>Skill · understand-outputs</div>
+      <div>Sample dictionary only · not the full ASD-STE100 word list</div>
+    </footer>
+  </article>
+
+<script>
+(function () {
+  var presets = {
+    reservoir: {
+      source: "It is imperative that the operator ensures the hydraulic reservoir is replenished prior to commencing operation.",
+      approved: "Make sure that the hydraulic reservoir is full before you start the operation."
+    },
+    valve: {
+      source: "The valve must be closed in order to utilize the panel prior to commencing the test.",
+      approved: "Close the valve before you start the test."
+    },
+    brake: {
+      source: "It is imperative that the technician does not touch the brake unit until such time as it is cool, as hot parts can cause injury.",
+      approved: "WARNING: Do not touch the brake unit until it is cool. Hot parts can cause injury."
+    }
+  };
+
+  var dictionary = [
+    { re: /\bin order to\b/gi, note: "in order to → TO" },
+    { re: /\bprior to\b/gi, note: "prior to → BEFORE" },
+    { re: /\bapproximately\b/gi, note: "approximately → ABOUT" },
+    { re: /\bcommenc(?:e|es|ed|ing)\b/gi, note: "commence → START" },
+    { re: /\bensur(?:e|es|ed|ing)\b/gi, note: "ensure → MAKE SURE" },
+    { re: /\breplenish(?:es|ed|ing)?\b/gi, note: "replenish → FILL" },
+    { re: /\butiliz(?:e|es|ed|ing)\b/gi, note: "utilize → USE" },
+    { re: /\bclose to\b/gi, note: "close (adj) → NEAR" },
+    { re: /\bit is imperative that\b/gi, note: "imperative clause → command" },
+    { re: /\buntil such time as\b/gi, note: "until such time as → until" }
+  ];
+
+  var formRules = [
+    { re: /\b(?:is|are|was|were)\s+\w+ing\b/gi, note: "progressive verb is not approved" },
+    { re: /\b(?:has|have|had)\s+\w+(?:ed|en)\b/gi, note: "perfect verb is not approved" },
+    { re: /\b(?:is|are|was|were|be|been)\s+\w+ed\b/gi, note: "passive verb in a procedure is not approved" },
+    { re: /\bmust be\b/gi, note: "must be → write the command" }
+  ];
+
+  var parts = {
+    verb: ["Approved verb", "Command form. “Make sure” stands in for “ensure”. The sentence tells the reader to do the action."],
+    name: ["Technical name", "“Hydraulic reservoir” is a technical name. Keep the same name every time you write it."],
+    full: ["Not “replenished”", "“Is full” replaces “is replenished”. Replenish is not approved. The approved word is FILL. This sentence uses “full”."],
+    before: ["Not “prior to”", "“Before” replaces “prior to”. Prior to is not an approved preposition."],
+    start: ["Not “commencing”", "“You start” is active and simple. Commence is not approved. The approved word is START."]
+  };
+
+  var source = document.getElementById("source");
+  var approved = document.getElementById("approved");
+  var marks = document.getElementById("marks");
+  var meter = document.getElementById("meter");
+  var mode = "80";
+  var kind = "procedural";
+  var presetId = "reservoir";
+
+  function wordCount(text) {
+    var words = text.trim().match(/[A-Za-z0-9’']+/g);
+    return words ? words.length : 0;
+  }
+
+  function cap() {
+    return kind === "procedural" ? 20 : 25;
+  }
+
+  function softCap() {
+    return Math.round(cap() * 1.4);
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function collect(text, rules) {
+    var found = [];
+    rules.forEach(function (rule) {
+      rule.re.lastIndex = 0;
+      var match;
+      while ((match = rule.re.exec(text))) {
+        found.push({ start: match.index, end: match.index + match[0].length, note: rule.note });
+        if (match.index === rule.re.lastIndex) rule.re.lastIndex++;
+      }
+    });
+    found.sort(function (a, b) { return a.start - b.start || b.end - a.end; });
+    var kept = [];
+    var cursor = 0;
+    found.forEach(function (hit) {
+      if (hit.start < cursor) return;
+      kept.push(hit);
+      cursor = hit.end;
+    });
+    return kept;
+  }
+
+  function highlight(text, hits) {
+    var html = "";
+    var cursor = 0;
+    hits.forEach(function (hit) {
+      html += escapeHtml(text.slice(cursor, hit.start));
+      html += "<mark class=\"hit\">" + escapeHtml(text.slice(hit.start, hit.end)) + "</mark>";
+      cursor = hit.end;
+    });
+    html += escapeHtml(text.slice(cursor));
+    return html;
+  }
+
+  function render() {
+    var text = source.value;
+    var dictHits = collect(text, dictionary);
+    var formHits = collect(text, formRules);
+    var count = wordCount(text);
+    var limit = cap();
+    var soft = softCap();
+    var countLevel = count === 0 ? "ok" : count <= limit ? "ok" : count <= soft ? "caution" : "reject";
+    if (mode === "full" && count > limit) countLevel = "reject";
+
+    meter.textContent = count + (count === 1 ? " word" : " words") + " · limit " + limit;
+    meter.className = "meter " + (countLevel === "reject" ? "bad" : countLevel === "caution" ? "warn" : "ok");
+
+    var label = document.getElementById("approved-label");
+    var known = presets[presetId] && text.trim() === presets[presetId].source.trim();
+    if (known) {
+      label.textContent = "Approved rewrite";
+      approved.textContent = presets[presetId].approved;
+      approved.className = "out";
+    } else if (dictHits.length === 0 && formHits.length === 0 && countLevel !== "reject") {
+      label.textContent = "Marks";
+      approved.textContent = "No sample mark on this text. That is not a claim that every word is in the official dictionary.";
+      approved.className = "out is-empty";
+    } else {
+      label.textContent = "Marks";
+      approved.innerHTML = highlight(text, dictHits.concat(formHits).sort(function (a, b) { return a.start - b.start; }));
+      approved.className = "out is-marks";
+    }
+
+    var stamps = [];
+    dictHits.forEach(function (hit) {
+      stamps.push({ level: "reject", note: hit.note });
+    });
+    formHits.forEach(function (hit) {
+      stamps.push({ level: mode === "full" ? "reject" : "caution", note: hit.note });
+    });
+    if (count > 0 && countLevel !== "ok") {
+      stamps.push({
+        level: countLevel === "reject" ? "reject" : "caution",
+        note: count + " words · " + kind + " limit " + limit
+      });
+    }
+    if (stamps.length === 0 && text.trim()) {
+      stamps.push({ level: "ok", note: "No sample rule fired" });
+    }
+
+    var seen = {};
+    marks.innerHTML = "";
+    stamps.forEach(function (stamp) {
+      if (seen[stamp.note]) return;
+      seen[stamp.note] = true;
+      var el = document.createElement("span");
+      el.className = "stamp " + stamp.level;
+      el.textContent = stamp.note;
+      marks.appendChild(el);
+    });
+  }
+
+  function setPreset(id) {
+    presetId = id;
+    source.value = presets[id].source;
+    document.querySelectorAll("[data-preset]").forEach(function (button) {
+      button.setAttribute("aria-pressed", button.getAttribute("data-preset") === id ? "true" : "false");
+    });
+    render();
+  }
+
+  source.addEventListener("input", function () {
+    presetId = "";
+    document.querySelectorAll("[data-preset]").forEach(function (button) {
+      button.setAttribute("aria-pressed", "false");
+    });
+    render();
+  });
+
+  document.querySelectorAll("[data-preset]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      setPreset(button.getAttribute("data-preset"));
+    });
+  });
+
+  document.querySelectorAll("[data-kind]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      kind = button.getAttribute("data-kind");
+      document.querySelectorAll("[data-kind]").forEach(function (other) {
+        other.setAttribute("aria-pressed", other === button ? "true" : "false");
+      });
+      render();
+    });
+  });
+
+  document.getElementById("mode-80").addEventListener("click", function () {
+    mode = "80";
+    document.getElementById("mode-80").setAttribute("aria-pressed", "true");
+    document.getElementById("mode-full").setAttribute("aria-pressed", "false");
+    render();
+  });
+  document.getElementById("mode-full").addEventListener("click", function () {
+    mode = "full";
+    document.getElementById("mode-full").setAttribute("aria-pressed", "true");
+    document.getElementById("mode-80").setAttribute("aria-pressed", "false");
+    render();
+  });
+
+  document.querySelectorAll(".rail button").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var rung = button.getAttribute("data-rung");
+      document.querySelectorAll(".rail button").forEach(function (other) {
+        other.setAttribute("aria-pressed", other === button ? "true" : "false");
+      });
+      document.querySelectorAll(".panel").forEach(function (panel) {
+        panel.classList.toggle("is-on", panel.id === "panel-" + rung);
+      });
+    });
+  });
+
+  function showPart(id) {
+    var part = parts[id];
+    document.getElementById("part-note").innerHTML =
+      "<div class=\"kw\">" + escapeHtml(part[0]) + "</div><p>" + escapeHtml(part[1]) + "</p>";
+    document.querySelectorAll("[data-part]").forEach(function (button) {
+      button.setAttribute("aria-pressed", button.getAttribute("data-part") === id ? "true" : "false");
+    });
+  }
+  document.querySelectorAll("[data-part]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      showPart(button.getAttribute("data-part"));
+    });
+  });
+
+  var beats = [
+    { kicker: "Beat 1 · Source", line: "It is imperative that the operator ensures the reservoir is replenished prior to commencing operation.", tone: "bad" },
+    { kicker: "Beat 2 · Unapproved words", line: "ensures · replenished · prior to · commencing", tone: "bad" },
+    { kicker: "Beat 3 · Approved words", line: "MAKE SURE · FILL · BEFORE · START", tone: "good" },
+    { kicker: "Beat 4 · One command", line: "Make sure that the hydraulic reservoir is full before you start the operation.", tone: "good" }
+  ];
+  var beatIndex = 0;
+  var beatTimer = null;
+  var play = document.getElementById("play");
+  var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function showBeat(index) {
+    var beat = beats[index];
+    document.getElementById("beat-kicker").textContent = beat.kicker;
+    var line = document.getElementById("beat-line");
+    line.textContent = beat.line;
+    line.className = "line " + beat.tone;
+  }
+
+  function stopBeats() {
+    if (beatTimer) clearInterval(beatTimer);
+    beatTimer = null;
+  }
+
+  function startBeats() {
+    stopBeats();
+    beatTimer = setInterval(function () {
+      beatIndex = (beatIndex + 1) % beats.length;
+      showBeat(beatIndex);
+    }, 2400);
+  }
+
+  play.addEventListener("click", function () {
+    var playing = play.getAttribute("aria-pressed") !== "true";
+    play.setAttribute("aria-pressed", playing ? "true" : "false");
+    play.textContent = playing ? "Pause" : "Play";
+    if (playing) startBeats();
+    else stopBeats();
+  });
+
+  if (reducedMotion) {
+    beatIndex = beats.length - 1;
+    showBeat(beatIndex);
+    play.setAttribute("aria-pressed", "false");
+    play.textContent = "Play";
+  } else {
+    startBeats();
+  }
+
+  setPreset("reservoir");
+  showPart("verb");
+})();
+</script>
+</body>
+</html>

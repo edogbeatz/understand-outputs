@@ -25,7 +25,7 @@ skills/understand-outputs/
 
 `references/ste.md` is the working subset of ASD-STE100 rules. `assets/ladder.html` is a page you can open in a browser. It marks a sentence against that subset.
 
-An explainer video is made on [ngram](https://www.ngram.com/). The agent shows the brief and waits for a yes before it creates the video.
+A web page is a [ChatGPT Site](https://learn.chatgpt.com/docs/sites). An explainer video is made on [ngram](https://www.ngram.com/). The agent shows the brief and waits for a yes before it creates either one.
 
 ## License
 

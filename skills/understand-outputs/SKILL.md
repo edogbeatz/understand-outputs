@@ -2,9 +2,9 @@
 name: understand-outputs
 description: >-
   Climbs an output ladder so results are easier to oversee: ASD-STE100 writing
-  (or 80% of the way to it), then a diagram, then an interactive HTML page,
-  then a bespoke explainer video on ngram.com after the user approves that
-  video's brief. Use when the user asks to
+  (or 80% of the way to it), then a diagram, then a ChatGPT Site after the
+  user approves that site's brief, then a bespoke explainer video on
+  ngram.com after the user approves that video's brief. Use when the user asks to
   understand, explain, summarize, compare, or review model output, a system, a
   decision, or a topic — and by default on explanatory replies. Implementation
   work still ships the code the user asked for.
@@ -32,7 +32,12 @@ When two rungs can carry the idea, pick the higher one.
 
 1. **Writing** — The answer is a few facts. Write the whole answer at 80% of the way to ASD-STE100. Use full ASD-STE100 when the user asks for the spec, or for a procedure in that language.
 2. **Diagram** — The idea is a structure, a flow, a comparison, or an anatomy. Make a figure (SVG or a generated image). Use Mermaid only when a figure file is not worth opening.
-3. **Web page** — The idea has parts the user will explore, compare, filter, or operate. Write one self-contained HTML file. Open it. Design it for the subject. Motion only where motion teaches the idea.
+3. **Web page** — The idea has parts the user will explore, compare, filter, or operate. Host it as a [ChatGPT Site](https://learn.chatgpt.com/docs/sites). Approval comes first.
+   - Write the brief in the chat: who uses the site, what they can do, and the prompt. The prompt includes the word "website" or `@Sites`. Then stop.
+   - Create the site only after the user says yes to that brief. A yes on an earlier site does not cover this one.
+   - In ChatGPT, or in Codex in the ChatGPT desktop app, start the Site after the yes. Leave access as ChatGPT sets it: the owner and workspace admins. Share it, or publish it on the internet, only when the user asks. Sites are listed at [chatgpt.com/sites](https://chatgpt.com/sites). Help: [Creating and managing ChatGPT Sites](https://help.openai.com/en/articles/20001339).
+   - If this agent cannot create a Site, give the approved prompt and write one self-contained HTML file. Say, in one sentence, that the hosted site is the ChatGPT one.
+   - Example prompt: `@Sites Build a website that explains the output ladder. The reader picks a rung. Writing, diagram, page, and video each do one job. Use ASD-STE100 at 80%.`
 4. **Explainer video** — The idea becomes clear only as it changes through time. Make it on [ngram](https://www.ngram.com/). Approval comes first.
    - Write the brief in the chat: audience, length, tone, and the prompt you will send. Then stop.
    - Create the video only after the user says yes to that brief. A yes on an earlier video does not cover this one.

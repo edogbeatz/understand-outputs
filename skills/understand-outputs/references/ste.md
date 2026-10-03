@@ -99,6 +99,19 @@ Approved:
 - Use a vertical list for complex text.
 - Write one topic in each paragraph.
 
+## Web page
+
+Host the page as a [ChatGPT Site](https://learn.chatgpt.com/docs/sites).
+
+1. Write the brief: who uses the site, what they can do, and the prompt. The prompt includes the word "website" or `@Sites`. Show it. Stop.
+2. Wait for a yes that names this brief. Do not create the site before that yes.
+3. After the yes, start a private preview. Share it, or publish it on the internet, only when the user asks. The list of sites is at [chatgpt.com/sites](https://chatgpt.com/sites).
+4. If this agent cannot create a Site, give the approved prompt and one HTML file.
+
+Example prompt:
+
+`@Sites Build a website that explains the output ladder. The reader picks a rung. Writing, diagram, page, and video each do one job. Use ASD-STE100 at 80%.`
+
 ## Video render
 
 Make the video on [ngram](https://www.ngram.com/). Docs: [MCP](https://www.ngram.com/docs/mcp), [API](https://www.ngram.com/docs/getting-started).
